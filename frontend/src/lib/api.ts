@@ -15,7 +15,8 @@ export class ApiError extends Error {
  *
  * `getAccessToken` is injected rather than imported directly, since the
  * Auth0 SDK's getAccessTokenSilently is only available from inside a
- * React hook (useAuth0) — see lib/queryClient.ts for how it's wired up.
+ * React hook (useAuth0) — see lib/workspaces.ts, lib/projects.ts, or
+ * lib/tasks.ts for how each query/mutation hook wires it in.
  */
 export async function apiFetch<T>(
   path: string,

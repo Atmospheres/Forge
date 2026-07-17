@@ -1,14 +1,7 @@
 import { createFileRoute, redirect, useParams } from '@tanstack/react-router';
-import { z } from 'zod';
 import { TaskBoard } from '../components/TaskBoard';
 
-const searchSchema = z.object({
-  status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
-});
-
 export const Route = createFileRoute('/workspaces/$workspaceId/projects/$projectId')({
-  validateSearch: searchSchema,
-
   beforeLoad: ({ context }) => {
     if (!context.auth.isAuthenticated) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's redirect() is a control-flow object by design, not a real Error

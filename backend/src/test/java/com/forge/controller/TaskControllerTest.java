@@ -155,6 +155,109 @@ class TaskControllerTest {
         verify(taskRepository, never()).save(any());
     }
 
+    @Test
+    void updateTask_blankTitle_returns400AndDoesNotSave() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        Project project = projectOwnedBy(projectId, OWNER_SUB);
+        when(projectRepository.findByIdWithWorkspace(projectId)).thenReturn(Optional.of(project));
+
+        mockMvc.perform(patch("/api/projects/{projectId}/tasks/{taskId}", projectId, taskId)
+                .with(jwt().jwt(j -> j.tokenValue("test-token").subject(OWNER_SUB)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new TitleOnly(""))))
+            .andExpect(status().isBadRequest());
+
+        verify(taskRepository, never()).save(any());
+    }
+
+    @Test
+    void updateTask_reorderWithinSameColumn_renumbersSiblings() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        UUID siblingAId = UUID.randomUUID();
+        UUID siblingBId = UUID.randomUUID();
+
+        Project project = projectOwnedBy(projectId, OWNER_SUB);
+        when(projectRepository.findByIdWithWorkspace(projectId)).thenReturn(Optional.of(project));
+
+        Task moving = mock(Task.class);
+        when(moving.getId()).thenReturn(taskId);
+        when(moving.getProject()).thenReturn(project);
+        when(moving.getStatus()).thenReturn(Task.TaskStatus.TODO);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(moving));
+
+        Task siblingA = mock(Task.class);
+        when(siblingA.getId()).thenReturn(siblingAId);
+        when(siblingA.getStatus()).thenReturn(Task.TaskStatus.TODO);
+
+        Task siblingB = mock(Task.class);
+        when(siblingB.getId()).thenReturn(siblingBId);
+        when(siblingB.getStatus()).thenReturn(Task.TaskStatus.TODO);
+
+        // Existing order: siblingA(0), moving(1), siblingB(2) — dragging `moving` to index 0
+        when(taskRepository.findByProjectIdOrderByPositionAsc(projectId))
+            .thenReturn(List.of(siblingA, moving, siblingB));
+
+        mockMvc.perform(patch("/api/projects/{projectId}/tasks/{taskId}", projectId, taskId)
+                .with(jwt().jwt(j -> j.tokenValue("test-token").subject(OWNER_SUB)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new PositionOnly(0))))
+            .andExpect(status().isOk());
+
+        verify(moving).setPosition(0);
+        verify(siblingA).setPosition(1);
+        verify(siblingB).setPosition(2);
+        verify(taskRepository).saveAll(List.of(moving, siblingA, siblingB));
+    }
+
+    @Test
+    void updateTask_moveToAnotherColumn_renumbersBothColumns() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        UUID oldColumnSiblingId = UUID.randomUUID();
+        UUID newColumnSiblingId = UUID.randomUUID();
+
+        Project project = projectOwnedBy(projectId, OWNER_SUB);
+        when(projectRepository.findByIdWithWorkspace(projectId)).thenReturn(Optional.of(project));
+
+        Task moving = mock(Task.class);
+        when(moving.getId()).thenReturn(taskId);
+        when(moving.getProject()).thenReturn(project);
+        when(moving.getStatus()).thenReturn(Task.TaskStatus.TODO);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(moving));
+
+        Task oldColumnSibling = mock(Task.class);
+        when(oldColumnSibling.getId()).thenReturn(oldColumnSiblingId);
+        when(oldColumnSibling.getStatus()).thenReturn(Task.TaskStatus.TODO);
+
+        Task newColumnSibling = mock(Task.class);
+        when(newColumnSibling.getId()).thenReturn(newColumnSiblingId);
+        when(newColumnSibling.getStatus()).thenReturn(Task.TaskStatus.DONE);
+
+        // TODO: moving(0), oldColumnSibling(1) — DONE: newColumnSibling(0)
+        // Dragging `moving` into DONE at index 0
+        when(taskRepository.findByProjectIdOrderByPositionAsc(projectId))
+            .thenReturn(List.of(moving, oldColumnSibling, newColumnSibling));
+
+        mockMvc.perform(patch("/api/projects/{projectId}/tasks/{taskId}", projectId, taskId)
+                .with(jwt().jwt(j -> j.tokenValue("test-token").subject(OWNER_SUB)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new StatusAndPosition("DONE", 0))))
+            .andExpect(status().isOk());
+
+        verify(moving).setStatus(Task.TaskStatus.DONE);
+        verify(moving).setPosition(0);
+        verify(newColumnSibling).setPosition(1);
+        verify(taskRepository).saveAll(List.of(moving, newColumnSibling));
+
+        // Left behind in TODO — renumbered to close the gap `moving` left at index 0
+        verify(oldColumnSibling).setPosition(0);
+        verify(taskRepository).saveAll(List.of(oldColumnSibling));
+    }
+
     private record TitleOnly(String title) {}
     private record StatusOnly(String status) {}
+    private record PositionOnly(Integer position) {}
+    private record StatusAndPosition(String status, Integer position) {}
 }
