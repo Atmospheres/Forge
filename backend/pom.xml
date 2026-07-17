@@ -118,6 +118,11 @@
                    into intermittent 401s that fail the whole scan. NVD is the primary data
                    source and doesn't need this analyzer. -->
               <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+              <!-- Unauthenticated NVD API calls are limited to 5 requests/30s vs 50/30s with a
+                   key, which makes this step slow and CI-unfriendly. Reads the key from an env
+                   var (not a direct property) per the plugin's own guidance, so it can't leak
+                   into Maven debug logs. -->
+              <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
           </configuration>
       </plugin>
     </plugins>

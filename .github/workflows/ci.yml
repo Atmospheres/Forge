@@ -33,6 +33,8 @@ jobs:
         run: ./mvnw -B spotbugs:check
 
       - name: OWASP dependency-check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./mvnw -B org.owasp:dependency-check-maven:check
 
       - name: Upload dependency-check report
