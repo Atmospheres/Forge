@@ -32,6 +32,18 @@ jobs:
       - name: SpotBugs
         run: ./mvnw -B spotbugs:check
 
+      - name: Cache NVD data
+        # Runners are ephemeral, so without this the CVE database re-syncs from scratch every
+        # run. Keyed on run_id so a save always happens (the NVD feed changes daily); restore-keys
+        # falls back to the most recent previous cache so each run only needs an incremental
+        # update instead of a full re-download.
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: depcheck-nvd-${{ github.run_id }}
+          restore-keys: |
+            depcheck-nvd-
+
       - name: OWASP dependency-check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
