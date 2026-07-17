@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build && tsc -b",
     "preview": "vite preview",
+    "prelint": "vite build --logLevel warn",
     "lint": "eslint .",
     "test": "vitest",
     "test:e2e": "playwright test",
