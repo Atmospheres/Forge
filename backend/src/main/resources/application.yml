@@ -1,0 +1,41 @@
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+    
+  application:
+    name: forge-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/forge
+    username: forge
+    password: forge
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Flyway owns the schema, Hibernate just validates against it
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://${AUTH0_DOMAIN}/
+          # audience is validated separately via a custom JwtDecoder validator, see SecurityConfig
+
+forge:
+  auth0:
+    audience: ${AUTH0_AUDIENCE}
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

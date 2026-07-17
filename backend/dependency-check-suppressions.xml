@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[
+        CVE-2025-7962 is an SMTP-injection bug in angus-mail (the Jakarta Mail SMTP client,
+        fixed in angus_mail 2.0.4). dependency-check matches it against angus-activation
+        (MIME type resolution only, no SMTP code) via a Low-confidence CPE guess based on
+        the shared "angus"/"eclipse" parent project. angus-activation has no release past
+        2.0.3 because there is nothing in it to fix.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.angus/angus\-activation@.*$</packageUrl>
+        <cpe>cpe:/a:eclipse:angus_mail</cpe>
+    </suppress>
+</suppressions>
