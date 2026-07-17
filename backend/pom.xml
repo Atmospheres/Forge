@@ -99,6 +99,7 @@
               <effort>Max</effort>
               <threshold>Medium</threshold>
               <failOnError>true</failOnError>
+              <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
           </configuration>
       </plugin>
       <plugin>
@@ -113,6 +114,10 @@
               <suppressionFiles>
                   <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
               </suppressionFiles>
+              <!-- No OSS Index credentials configured; unauthenticated requests get rate-limited
+                   into intermittent 401s that fail the whole scan. NVD is the primary data
+                   source and doesn't need this analyzer. -->
+              <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
           </configuration>
       </plugin>
     </plugins>

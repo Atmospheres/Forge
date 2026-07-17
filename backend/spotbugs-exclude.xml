@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!--
+    JPA entity associations (@ManyToOne/@OneToMany etc.) are meant to expose the managed
+    entity/proxy directly through getters and constructors. That's how Hibernate's
+    lazy-loading and dirty-checking work. Defensive copying here would break entity
+    identity and is not an appropriate fix, so these two rules are excluded for entities.
+    -->
+    <Match>
+        <Package name="com.forge.model"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>
