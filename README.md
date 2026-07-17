@@ -38,17 +38,22 @@ npm run build              # vite build, then tsc -b
 
 ### OWASP dependency-check
 
-Uses the NVD API, which is rate-limited hard without a key (5 req/30s vs 50 req/30s). For a
-faster local scan, request a free key at https://nvd.nist.gov/developers/request-an-api-key
-and export it before running:
+Uses the NVD API, which is rate-limited hard without a key (5 req/30s vs 50 req/30s).
+
+**CI**: already configured — the `NVD_API_KEY` repository secret is set (Settings > Secrets
+and variables > Actions), and the downloaded CVE data is cached between runs (see
+`.github/workflows/ci.yml`), so only the first run after a cache miss pays the full sync cost.
+
+**Local dev**: request your own free key at https://nvd.nist.gov/developers/request-an-api-key,
+then export it before running the scan:
 
 ```
 export NVD_API_KEY=your-key
+./mvnw org.owasp:dependency-check-maven:check
 ```
 
-In CI this is read from the `NVD_API_KEY` repository secret and the downloaded CVE data is
-cached between runs (see `.github/workflows/ci.yml`), so only the first run after a cache
-miss pays the full sync cost.
+Without it the scan still works, just slower (and only ever hits the unauthenticated rate
+limit locally — there's no local cache like CI has).
 
 ## Status
 
