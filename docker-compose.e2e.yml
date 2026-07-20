@@ -1,0 +1,13 @@
+services:
+  postgres-e2e:
+    image: postgres:16-alpine
+    container_name: forge-postgres-e2e
+    environment:
+      POSTGRES_USER: forge
+      POSTGRES_PASSWORD: forge
+      POSTGRES_DB: forge_e2e
+    ports:
+      - "5433:5432"
+    # tmpfs, not a named volume: E2E data should never persist between runs.
+    tmpfs:
+      - /var/lib/postgresql/data
