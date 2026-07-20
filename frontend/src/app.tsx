@@ -5,6 +5,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import type { RegisteredRouter } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { setLoginWithRedirect } from './auth/authRedirect';
+import { ThemeProvider } from './theme';
 
 export function App({
   router,
@@ -28,7 +29,9 @@ export function App({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

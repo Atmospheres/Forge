@@ -33,7 +33,7 @@ function ProjectBoard() {
             <Link
               to="/workspaces/$workspaceId"
               params={{ workspaceId }}
-              className="hover:text-slate-900"
+              className="hover:text-slate-900 dark:hover:text-slate-100"
             >
               {workspace?.name ?? '...'}
             </Link>
@@ -43,10 +43,12 @@ function ProjectBoard() {
       }
     >
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           {project?.name ?? 'Project board'}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">Drag tasks between columns to update status.</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Drag tasks between columns to update status.
+        </p>
       </div>
 
       <TaskBoard projectId={projectId} />

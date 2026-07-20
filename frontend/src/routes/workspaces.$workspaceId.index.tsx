@@ -24,25 +24,25 @@ function WorkspaceDetail() {
   return (
     <AppShell breadcrumb={<Crumb current>{workspace?.name ?? '...'}</Crumb>}>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           {workspace?.name ?? 'Projects'}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">Projects in this workspace.</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Projects in this workspace.</p>
       </div>
 
       <div className="space-y-6">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <CreateNameForm
             placeholder="New project name"
             onCreate={(name) => createProject.mutateAsync(name)}
           />
         </div>
 
-        {isLoading && <p className="text-sm text-slate-500">Loading projects...</p>}
-        {isError && <p className="text-sm text-red-600">Failed to load projects.</p>}
+        {isLoading && <p className="text-sm text-slate-500 dark:text-slate-400">Loading projects...</p>}
+        {isError && <p className="text-sm text-red-600 dark:text-red-400">Failed to load projects.</p>}
 
         {projects?.length === 0 && (
-          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
             No projects yet — create one above to get started.
           </p>
         )}
@@ -65,13 +65,13 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
 
   if (isEditing) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <input
           value={name}
           onChange={(e) => {
             setName(e.target.value);
           }}
-          className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           autoFocus
         />
         <div className="flex gap-3 text-sm">
@@ -82,7 +82,7 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
                 { onSuccess: () => { setIsEditing(false); } }
               );
             }}
-            className="font-medium text-slate-900 underline underline-offset-2"
+            className="font-medium text-slate-900 underline underline-offset-2 dark:text-slate-100"
           >
             Save
           </button>
@@ -91,7 +91,7 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
               setName(project.name);
               setIsEditing(false);
             }}
-            className="text-slate-500 underline underline-offset-2"
+            className="text-slate-500 underline underline-offset-2 dark:text-slate-400"
           >
             Cancel
           </button>
@@ -101,14 +101,14 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
   }
 
   return (
-    <div className="group relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
+    <div className="group relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600">
       <Link
         to="/workspaces/$workspaceId/projects/$projectId"
         params={{ workspaceId, projectId: project.id }}
         className="block"
       >
-        <h2 className="pr-14 font-semibold text-slate-900">{project.name}</h2>
-        <p className="mt-1 text-xs text-slate-400">
+        <h2 className="pr-14 font-semibold text-slate-900 dark:text-slate-100">{project.name}</h2>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           Created {new Date(project.createdAt).toLocaleDateString()}
         </p>
       </Link>
@@ -118,7 +118,7 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
           onClick={() => {
             setIsEditing(true);
           }}
-          className="text-slate-400 hover:text-slate-900"
+          className="text-slate-400 hover:text-slate-900 dark:text-slate-500 dark:hover:text-slate-100"
         >
           Rename
         </button>
@@ -128,7 +128,7 @@ function ProjectCard({ workspaceId, project }: { workspaceId: string; project: P
               deleteProject.mutate(project.id);
             }
           }}
-          className="text-slate-400 hover:text-red-600"
+          className="text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400"
         >
           Delete
         </button>
