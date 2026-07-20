@@ -8,6 +8,7 @@ import { routeTree } from './routeTree.gen';
 import type { RouterContext } from './routes/__root';
 import './index.css';
 import { redirectToLoginIfAuthError } from './auth/authRedirect';
+import { ThemeProvider } from './theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,8 +40,10 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <Auth0ProviderWithNavigate router={router}>
-      <App router={router} queryClient={queryClient} />
-    </Auth0ProviderWithNavigate>
+    <ThemeProvider>
+      <Auth0ProviderWithNavigate router={router}>
+        <App router={router} queryClient={queryClient} />
+      </Auth0ProviderWithNavigate>
+    </ThemeProvider>
   </React.StrictMode>
 );

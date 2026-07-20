@@ -27,11 +27,13 @@ export function TaskColumn({
   const { setNodeRef } = useDroppable({ id: status });
 
   return (
-    <div className="flex min-w-[18rem] flex-1 flex-col rounded-xl bg-slate-100 p-4">
+    <div className="flex min-w-[18rem] flex-1 flex-col rounded-xl bg-slate-100 p-4 dark:bg-slate-900">
       <div className="mb-4 flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${COLUMN_ACCENTS[status]}`} aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-slate-700">{COLUMN_LABELS[status]}</h2>
-        <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {COLUMN_LABELS[status]}
+        </h2>
+        <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
           {tasks.length}
         </span>
       </div>
