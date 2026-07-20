@@ -69,6 +69,7 @@ function UserMenu({ name }: { name: string }) {
         }}
         className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
         aria-expanded={isOpen}
+        aria-label="User menu"
       >
         {name}
         <span className="text-xs text-slate-400" aria-hidden="true">
