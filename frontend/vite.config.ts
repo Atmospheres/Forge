@@ -6,8 +6,14 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 // routeFileIgnorePattern excludes src/routes/__tests__/ -- those are route *tests*,
 // not route files, and the plugin otherwise warns on every one since they don't
 // export a Route.
+// autoCodeSplitting moves each route's component into its own lazy-loaded chunk
+// (e.g. dnd-kit only ships to the task board route, react-hook-form/zod only to
+// routes with forms) instead of bundling every route into the single main chunk.
 export default defineConfig({
-  plugins: [tanstackRouter({ routeFileIgnorePattern: '__tests__' }), react()],
+  plugins: [
+    tanstackRouter({ routeFileIgnorePattern: '__tests__', autoCodeSplitting: true }),
+    react(),
+  ],
   server: {
     port: 5173,
   },
