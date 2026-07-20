@@ -28,8 +28,8 @@ export function TaskBoard({ projectId }: { projectId: string }) {
   // click-based interactions later (e.g. opening task details).
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  if (isLoading) return <p>Loading tasks...</p>;
-  if (isError) return <p className="text-red-600">Failed to load tasks.</p>;
+  if (isLoading) return <p className="text-sm text-slate-500">Loading tasks...</p>;
+  if (isError) return <p className="text-sm text-red-600">Failed to load tasks.</p>;
 
   const tasksByStatus = (status: Task['status']) =>
     (tasks ?? []).filter((t) => t.status === status).sort((a, b) => a.position - b.position);
@@ -77,7 +77,7 @@ export function TaskBoard({ projectId }: { projectId: string }) {
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <CreateNameForm
           placeholder="New task title"
           onCreate={(title) => createTask.mutateAsync(title)}
@@ -90,7 +90,7 @@ export function TaskBoard({ projectId }: { projectId: string }) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-5 lg:flex-row">
           {STATUSES.map((status) => (
             <TaskColumn
               key={status}

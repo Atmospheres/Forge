@@ -9,6 +9,12 @@ const COLUMN_LABELS: Record<Task['status'], string> = {
   DONE: 'Done',
 };
 
+const COLUMN_ACCENTS: Record<Task['status'], string> = {
+  TODO: 'bg-slate-400',
+  IN_PROGRESS: 'bg-blue-500',
+  DONE: 'bg-emerald-500',
+};
+
 export function TaskColumn({
   status,
   tasks,
@@ -21,13 +27,17 @@ export function TaskColumn({
   const { setNodeRef } = useDroppable({ id: status });
 
   return (
-    <div className="flex w-72 flex-col rounded bg-gray-100 p-3">
-      <h2 className="mb-3 text-sm font-semibold text-gray-700">
-        {COLUMN_LABELS[status]} <span className="text-gray-400">({tasks.length})</span>
-      </h2>
+    <div className="flex min-w-[18rem] flex-1 flex-col rounded-xl bg-slate-100 p-4">
+      <div className="mb-4 flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${COLUMN_ACCENTS[status]}`} aria-hidden="true" />
+        <h2 className="text-sm font-semibold text-slate-700">{COLUMN_LABELS[status]}</h2>
+        <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500">
+          {tasks.length}
+        </span>
+      </div>
 
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div ref={setNodeRef} className="flex min-h-[4rem] flex-col gap-2">
+        <div ref={setNodeRef} className="flex min-h-[6rem] flex-1 flex-col gap-3">
           {tasks.map((task) => (
             <TaskCard key={task.id} task={task} projectId={projectId} />
           ))}

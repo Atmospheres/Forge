@@ -27,19 +27,19 @@ export function CreateNameForm({
   });
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)} className="flex items-start gap-2">
-      <div>
+    <form onSubmit={(e) => void onSubmit(e)} className="flex items-start gap-3">
+      <div className="flex-1">
         <input
           {...register('name')}
           placeholder={placeholder}
-          className="rounded border px-3 py-2"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-slate-500 focus:outline-none"
         />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
       >
         {isSubmitting ? 'Creating...' : 'Create'}
       </button>

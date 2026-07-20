@@ -18,6 +18,15 @@ export function useWorkspaces() {
   });
 }
 
+export function useWorkspace(workspaceId: string) {
+  const { getAccessTokenSilently } = useAuth0();
+
+  return useQuery({
+    queryKey: ['workspaces', workspaceId],
+    queryFn: () => apiFetch<Workspace>(`/api/workspaces/${workspaceId}`, getAccessTokenSilently),
+  });
+}
+
 export function useCreateWorkspace() {
   const { getAccessTokenSilently } = useAuth0();
   const queryClient = useQueryClient();
