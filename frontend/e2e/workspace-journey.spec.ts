@@ -1,4 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+/**
+ * The card containing `text` (a workspace/project name, or a task title).
+ * Needed because these lists can have multiple items -- including leftovers
+ * from a previous failed run -- so a page-wide getByRole('button', { name:
+ * 'Delete' }) isn't reliably scoped to the one we actually want.
+ */
+function cardFor(page: Page, text: string) {
+  return page
+    .getByText(text, { exact: true })
+    .locator('xpath=ancestor::div[contains(@class, "group")]')
+    .first();
+}
 
 test.describe.serial('workspace -> project -> task journey', () => {
   const workspaceName = `E2E Workspace ${Date.now().toString()}`;
@@ -17,7 +30,7 @@ test.describe.serial('workspace -> project -> task journey', () => {
 
   test('opens the workspace and creates a project', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(workspaceName).click();
+    await page.getByText(workspaceName, { exact: true }).click();
 
     await expect(page.getByText('Projects in this workspace.')).toBeVisible();
     await page.getByPlaceholder('New project name').fill(projectName);
@@ -28,8 +41,8 @@ test.describe.serial('workspace -> project -> task journey', () => {
 
   test('opens the project board and creates a task', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(workspaceName).click();
-    await page.getByText(projectName).click();
+    await page.getByText(workspaceName, { exact: true }).click();
+    await page.getByText(projectName, { exact: true }).click();
 
     await expect(page.getByText('Drag tasks between columns to update status.')).toBeVisible();
     await page.getByPlaceholder('New task title').fill(taskName);
@@ -40,11 +53,11 @@ test.describe.serial('workspace -> project -> task journey', () => {
 
   test('drags the task from To Do into In Progress', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(workspaceName).click();
-    await page.getByText(projectName).click();
+    await page.getByText(workspaceName, { exact: true }).click();
+    await page.getByText(projectName, { exact: true }).click();
     await expect(page.getByText(taskName)).toBeVisible();
 
-    const card = page.getByText(taskName);
+    const card = page.getByText(taskName, { exact: true });
     // The column header ("In Progress" + its count badge) sits above the
     // drop area -- drag toward its empty column body, not the header text
     // itself, since that's not a droppable target.
@@ -80,25 +93,28 @@ test.describe.serial('workspace -> project -> task journey', () => {
 
   test('cleans up: deletes the task, project, and workspace', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(workspaceName).click();
-    await page.getByText(projectName).click();
+    await page.getByText(workspaceName, { exact: true }).click();
+    await page.getByText(projectName, { exact: true }).click();
 
     page.once('dialog', (d) => void d.accept());
-    await page.getByText(taskName).hover();
-    await page.getByRole('button', { name: 'Delete' }).click();
+    const taskCard = cardFor(page, taskName);
+    await taskCard.hover();
+    await taskCard.getByRole('button', { name: 'Delete', exact: true }).click();
     await expect(page.getByText(taskName)).not.toBeVisible();
 
     await page.goto('/');
-    await page.getByText(workspaceName).click();
+    await page.getByText(workspaceName, { exact: true }).click();
     page.once('dialog', (d) => void d.accept());
-    await page.getByText(projectName).hover();
-    await page.getByRole('button', { name: 'Delete' }).click();
+    const projectCard = cardFor(page, projectName);
+    await projectCard.hover();
+    await projectCard.getByRole('button', { name: 'Delete', exact: true }).click();
     await expect(page.getByText(projectName)).not.toBeVisible();
 
     await page.goto('/');
     page.once('dialog', (d) => void d.accept());
-    await page.getByText(workspaceName).hover();
-    await page.getByRole('button', { name: 'Delete' }).click();
+    const workspaceCard = cardFor(page, workspaceName);
+    await workspaceCard.hover();
+    await workspaceCard.getByRole('button', { name: 'Delete', exact: true }).click();
     await expect(page.getByText(workspaceName)).not.toBeVisible();
   });
 });

@@ -17,10 +17,11 @@ setup('authenticate with Auth0', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Log in' }).click();
 
-  // Auth0's Universal Login page
+  // Auth0's Classic Universal Login (the Lock widget) -- fields have no
+  // useful `name` attribute, just an accessible name via aria-label.
   await page.waitForURL(/\/(u\/)?login/, { timeout: 15_000 });
-  await page.locator('input[name="username"]').fill(email);
-  await page.locator('input[name="password"]').fill(password);
+  await page.getByRole('textbox', { name: 'Email' }).fill(email);
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: /continue|log in/i }).click();
 
   // Back on the app, authenticated
