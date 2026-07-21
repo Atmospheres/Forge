@@ -6,6 +6,7 @@ import type { RegisteredRouter } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { setLoginWithRedirect } from './auth/authRedirect';
 import { ThemeProvider } from './theme';
+import { ToastProvider } from './ToastProvider';
 
 export function App({
   router,
@@ -30,7 +31,9 @@ export function App({
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
