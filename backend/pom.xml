@@ -12,7 +12,7 @@
 
   <groupId>com.forge</groupId>
   <artifactId>forge-backend</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
   <name>forge-backend</name>
 
   <properties>

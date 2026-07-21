@@ -71,6 +71,13 @@ Default: burst up to 120 requests, refilling at 120/min. Configurable via
 `forge.rate-limit.refill-period-seconds` in `application.yml` (or the matching
 `FORGE_RATE_LIMIT_*` env vars).
 
+### CORS
+
+Allowed origins default to the local frontend dev server (`http://localhost:5173`) and are
+**not** hardcoded beyond that -- set `FORGE_CORS_ALLOWED_ORIGINS` (comma-separated) to your
+deployed frontend's origin(s) before hosting this anywhere, or the browser will reject every
+request with a CORS error.
+
 ## E2E tests
 
 Playwright, but against the real stack, not mocks: a real Auth0 login, the real backend, and
