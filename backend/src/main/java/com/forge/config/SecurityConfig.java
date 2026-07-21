@@ -1,6 +1,7 @@
 package com.forge.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -38,9 +40,29 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuer;
 
+    @Bean
+    public RateLimitFilter rateLimitFilter(
+        @Value("${forge.rate-limit.capacity:120}") int capacity,
+        @Value("${forge.rate-limit.refill-tokens:120}") int refillTokens,
+        @Value("${forge.rate-limit.refill-period-seconds:60}") int refillPeriodSeconds
+    ) {
+        return new RateLimitFilter(capacity, refillTokens, refillPeriodSeconds);
+    }
+
+    // Spring Boot auto-registers any Filter bean directly with the embedded servlet
+    // container by default. Disabled here since rateLimitFilter is deliberately wired
+    // into the Spring Security chain below instead (via addFilterAfter) -- without this
+    // it would run twice per request, once outside Spring Security's context where the
+    // JWT subject isn't available yet.
+    @Bean
+    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter rateLimitFilter) {
+        FilterRegistrationBean<RateLimitFilter> registration = new FilterRegistrationBean<>(rateLimitFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, RateLimitFilter rateLimitFilter) throws Exception {
         http
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(csrf -> csrf.disable()) // stateless JWT API, no cookies/CSRF surface
@@ -56,7 +78,11 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            // Runs after the bearer token is parsed so authenticated requests are
+            // keyed by JWT subject rather than IP; unauthenticated requests still
+            // fall back to per-IP limiting.
+            .addFilterAfter(rateLimitFilter, BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }
