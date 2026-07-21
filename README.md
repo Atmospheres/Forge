@@ -6,11 +6,11 @@ per-user ownership enforced at every layer.
 [![CI](https://github.com/Atmospheres/Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/Atmospheres/Forge/actions/workflows/ci.yml)
 [![E2E](https://github.com/Atmospheres/Forge/actions/workflows/e2e.yml/badge.svg)](https://github.com/Atmospheres/Forge/actions/workflows/e2e.yml)
 
-- **frontend/** — React 18 + TypeScript + Vite, TanStack Router + TanStack Query, Auth0 (OIDC/PKCE), Tailwind CSS (with dark mode, synced server-side per account)
-- **backend/** — Spring Boot 4 (Java 21), Spring Security OAuth2 Resource Server, Spring Data JPA + Hibernate, Postgres, Flyway
+- **frontend/** — React 18 + TypeScript + Vite, TanStack Router + TanStack Query, Auth0 (OIDC/PKCE), Tailwind CSS (with dark mode, synced server-side per account), a toast notification system for API errors
+- **backend/** — Spring Boot 4 (Java 21), Spring Security OAuth2 Resource Server, Spring Data JPA + Hibernate, Postgres, Flyway, per-user/per-IP rate limiting
 - **frontend/e2e/** — Playwright tests against the real stack (real Auth0 login, real backend, an isolated database) — see `frontend/e2e/README.md`
 - **docker-compose.yml** — local Postgres instance
-- **.github/workflows/ci.yml** — backend (tests, checkstyle, spotbugs, OWASP dependency scan) and frontend (lint, tests, build) on every push/PR to `main`
+- **.github/workflows/ci.yml** — backend (tests, checkstyle, spotbugs, OWASP dependency scan) and frontend (lint, tests, build) on every push/PR to `main`; both jobs are required status checks, so a PR can't merge into `main` unless they pass
 - **.github/workflows/e2e.yml** — the Playwright suite above, against a Postgres service container and a real backend started in-job; nightly + on-demand, not on every push
 
 ## Getting started
@@ -58,6 +58,19 @@ export NVD_API_KEY=your-key
 Without it the scan still works, just slower (and only ever hits the unauthenticated rate
 limit locally — there's no local cache like CI has).
 
+### Rate limiting
+
+An in-memory token bucket (Bucket4j + Caffeine) guards the API, keyed by JWT subject for
+authenticated requests and falling back to client IP otherwise — it's meant to blunt abuse or
+a runaway/misbehaving client, not to gate normal usage. Health and docs endpoints are exempt.
+Requests over the limit get a `429` with a `Retry-After` header, which the frontend's toast
+system surfaces to the user.
+
+Default: burst up to 120 requests, refilling at 120/min. Configurable via
+`forge.rate-limit.capacity`, `forge.rate-limit.refill-tokens`, and
+`forge.rate-limit.refill-period-seconds` in `application.yml` (or the matching
+`FORGE_RATE_LIMIT_*` env vars).
+
 ## E2E tests
 
 Playwright, but against the real stack, not mocks: a real Auth0 login, the real backend, and
@@ -88,5 +101,7 @@ is a separate, equally disposable instance on 5432, only alive for that one job.
 
 Implemented: full CRUD for Workspace/Project/Task with ownership checks at every layer,
 Auth0 login flow, TanStack Router nested routes with a drag-and-drop task board, optimistic
-mutations, dark mode (synced per-account, not just localStorage), backend JUnit tests
-(`@WebMvcTest` + Mockito), frontend Vitest + RTL tests, a real-stack Playwright E2E suite, CI.
+mutations, dark mode (synced per-account, not just localStorage), per-user/per-IP rate
+limiting, a toast notification system for API errors, backend JUnit tests (`@WebMvcTest` +
+Mockito), frontend Vitest + RTL tests, a real-stack Playwright E2E suite, CI with required
+status checks gating merges to `main`.
