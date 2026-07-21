@@ -32,6 +32,13 @@ spring:
 forge:
   auth0:
     audience: ${AUTH0_AUDIENCE}
+  rate-limit:
+    # Token bucket per authenticated user (JWT sub) or, for unauthenticated
+    # requests, per IP. Burst up to capacity, sustained rate is refill-tokens
+    # per refill-period-seconds.
+    capacity: 120
+    refill-tokens: 120
+    refill-period-seconds: 60
 
 server:
   port: 8080
