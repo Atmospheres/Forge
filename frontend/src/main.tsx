@@ -7,17 +7,29 @@ import { App } from './app';
 import { routeTree } from './routeTree.gen';
 import type { RouterContext } from './routes/__root';
 import './index.css';
-import { redirectToLoginIfAuthError } from './auth/authRedirect';
+import { isAuthTokenError, redirectToLoginIfAuthError } from './auth/authRedirect';
+import { notifyError } from './toast';
+
+// A failed silent token refresh redirects to login instead of showing a
+// toast -- the page is about to navigate away, so a toast would just flash
+// and disappear.
+function handleQueryError(error: unknown) {
+  if (isAuthTokenError(error)) {
+    redirectToLoginIfAuthError(error);
+  } else {
+    notifyError(error);
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, staleTime: 30_000 },
   },
   queryCache: new QueryCache({
-    onError: redirectToLoginIfAuthError,
+    onError: handleQueryError,
   }),
   mutationCache: new MutationCache({
-    onError: redirectToLoginIfAuthError,
+    onError: handleQueryError,
   }),
 });
 
