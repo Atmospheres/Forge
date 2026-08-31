@@ -121,6 +121,7 @@ jobs:
           projectBaseDir: frontend
           args: >
             -Dsonar.projectKey=Atmospheres_Forge-frontend
+            -Dsonar.projectName=forge-frontend
             -Dsonar.organization=atmospheres
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src
