@@ -6,20 +6,20 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.7</version>
+    <version>4.0.8</version>
     <relativePath/>
   </parent>
 
   <groupId>com.forge</groupId>
   <artifactId>forge-backend</artifactId>
-  <version>0.5.1</version>
+  <version>0.5.2</version>
   <name>forge-backend</name>
 
   <properties>
     <java.version>21</java.version>
-    <!-- Boot 4.0.7 manages 11.0.22; override to pick up CVE-2026-53434/53404/55276 (fixed 11.0.23)
-         and CVE-2026-59083/59084 (fixed 11.0.24) ahead of the next Boot patch release. -->
-    <tomcat.version>11.0.24</tomcat.version>
+    <!-- Boot 4.0.8 manages 11.0.24; override to pick up CVE-2026-65637/65905/65182/68525/65183/
+         66422/68569/65927/68763/73180/66299 (fixed 11.0.25) ahead of the next Boot patch release. -->
+    <tomcat.version>11.0.25</tomcat.version>
   </properties>
 
   <dependencies>
@@ -63,7 +63,10 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.6.0</version>
+      <!-- springdoc 2.x targets Spring Boot 3; 3.x targets Boot 4 (this project's version).
+           Also picks up a newer bundled swagger-ui with a patched DOMPurify (was CVE-2026-65898
+           and others in 2.6.0's bundled swagger-ui-bundle.js). -->
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.bucket4j</groupId>
