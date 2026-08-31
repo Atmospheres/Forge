@@ -5,12 +5,14 @@ per-user ownership enforced at every layer.
 
 [![CI](https://github.com/Atmospheres/Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/Atmospheres/Forge/actions/workflows/ci.yml)
 [![E2E](https://github.com/Atmospheres/Forge/actions/workflows/e2e.yml/badge.svg)](https://github.com/Atmospheres/Forge/actions/workflows/e2e.yml)
+[![Backend Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Atmospheres_Forge-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Atmospheres_Forge-backend)
+[![Frontend Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Atmospheres_Forge-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Atmospheres_Forge-frontend)
 
 - **frontend/** — React 18 + TypeScript + Vite, TanStack Router + TanStack Query, Auth0 (OIDC/PKCE), Tailwind CSS (with dark mode, synced server-side per account), a toast notification system for API errors
 - **backend/** — Spring Boot 4 (Java 21), Spring Security OAuth2 Resource Server, Spring Data JPA + Hibernate, Postgres, Flyway, per-user/per-IP rate limiting
 - **frontend/e2e/** — Playwright tests against the real stack (real Auth0 login, real backend, an isolated database) — see `frontend/e2e/README.md`
 - **docker-compose.yml** — local Postgres instance
-- **.github/workflows/ci.yml** — backend (tests, checkstyle, spotbugs, OWASP dependency scan) and frontend (lint, tests, build) on every push/PR to `main`; both jobs are required status checks, so a PR can't merge into `main` unless they pass
+- **.github/workflows/ci.yml** — backend (tests, checkstyle, spotbugs, OWASP dependency scan, SonarCloud) and frontend (lint, tests, build, SonarCloud) on every push/PR to `main`; both jobs are required status checks, so a PR can't merge into `main` unless they pass
 - **.github/workflows/e2e.yml** — the Playwright suite above, against a Postgres service container and a real backend started in-job; nightly + on-demand, not on every push
 
 ## Getting started
@@ -78,6 +80,17 @@ Allowed origins default to the local frontend dev server (`http://localhost:5173
 deployed frontend's origin(s) before hosting this anywhere, or the browser will reject every
 request with a CORS error.
 
+### SonarCloud
+
+Static analysis and a quality gate, as two separate SonarCloud projects (backend, frontend)
+mirroring the two CI jobs. Runs on every push/PR via the `SonarCloud analysis` step in each
+job, using the `SONAR_TOKEN` repository secret. Not required to merge (yet) -- see the badges
+above, or https://sonarcloud.io/organizations/atmospheres/projects for the full dashboards.
+
+Fork PRs don't have access to `SONAR_TOKEN` (GitHub withholds secrets from fork-triggered
+`pull_request` runs), so that step fails there; not a concern while this repo has no external
+contributors.
+
 ## E2E tests
 
 Playwright, but against the real stack, not mocks: a real Auth0 login, the real backend, and
@@ -111,4 +124,4 @@ Auth0 login flow, TanStack Router nested routes with a drag-and-drop task board,
 mutations, dark mode (synced per-account, not just localStorage), per-user/per-IP rate
 limiting, a toast notification system for API errors, backend JUnit tests (`@WebMvcTest` +
 Mockito), frontend Vitest + RTL tests, a real-stack Playwright E2E suite, CI with required
-status checks gating merges to `main`.
+status checks gating merges to `main`, SonarCloud static analysis.
