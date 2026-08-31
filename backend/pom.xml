@@ -12,7 +12,7 @@
 
   <groupId>com.forge</groupId>
   <artifactId>forge-backend</artifactId>
-  <version>0.5.2</version>
+  <version>0.5.3</version>
   <name>forge-backend</name>
 
   <properties>
@@ -121,6 +121,27 @@
               <failOnError>true</failOnError>
               <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
           </configuration>
+      </plugin>
+      <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.15</version>
+          <executions>
+              <!-- Instruments classes for coverage during `mvn test`, then writes the XML
+                   report SonarCloud reads (sonar.coverage.jacoco.xmlReportPaths in ci.yml). -->
+              <execution>
+                  <goals>
+                      <goal>prepare-agent</goal>
+                  </goals>
+              </execution>
+              <execution>
+                  <id>report</id>
+                  <phase>test</phase>
+                  <goals>
+                      <goal>report</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
       <plugin>
           <groupId>org.owasp</groupId>
