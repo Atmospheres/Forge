@@ -15,6 +15,9 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          # SonarCloud wants full history for SCM blame / new-code-period analysis.
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -32,15 +35,22 @@ jobs:
       - name: SpotBugs
         run: ./mvnw -B spotbugs:check
 
+      - name: Get current UTC date
+        id: date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Cache NVD data
         # Runners are ephemeral, so without this the CVE database re-syncs from scratch every
-        # run. Keyed on run_id so a save always happens (the NVD feed changes daily); restore-keys
-        # falls back to the most recent previous cache so each run only needs an incremental
-        # update instead of a full re-download.
+        # run. Keyed on UTC date (not run_id -- that's unique per run, so every single run saved
+        # a brand-new full copy under a key nothing else ever reused, quietly burning through
+        # GitHub's 10GB total cache cap within a day of heavy iteration and evicting the entries
+        # later runs needed). One key per day: same-day runs get an exact-match restore (no
+        # download at all), and restore-keys falls back to the most recent previous day's cache
+        # for an incremental update otherwise.
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: depcheck-nvd-${{ github.run_id }}
+          key: depcheck-nvd-${{ steps.date.outputs.date }}
           restore-keys: |
             depcheck-nvd-
 
@@ -48,6 +58,18 @@ jobs:
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./mvnw -B org.owasp:dependency-check-maven:check
+
+      - name: SonarCloud analysis
+        # SONAR_TOKEN isn't available on PRs from forks (GitHub withholds secrets from
+        # fork-triggered pull_request runs), so this step will fail there -- not a concern
+        # while this repo has no external contributors.
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar
+          -Dsonar.projectKey=Atmospheres_Forge-backend
+          -Dsonar.organization=atmospheres
+          -Dsonar.host.url=https://sonarcloud.io
 
       - name: Upload dependency-check report
         if: always()
@@ -65,6 +87,9 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          # SonarCloud wants full history for SCM blame / new-code-period analysis.
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -84,3 +109,19 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: SonarCloud analysis
+        # See the backend job's SonarCloud step -- same fork-PR caveat applies here.
+        # Pinned to a full commit SHA (not just the v8 tag) since it's a third-party action --
+        # a tag can be moved to point at different code later, a commit SHA can't.
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: frontend
+          args: >
+            -Dsonar.projectKey=Atmospheres_Forge-frontend
+            -Dsonar.organization=atmospheres
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=src
+            -Dsonar.exclusions=**/routeTree.gen.ts
