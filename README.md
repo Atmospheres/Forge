@@ -87,6 +87,11 @@ mirroring the two CI jobs. Runs on every push/PR via the `SonarCloud analysis` s
 job, using the `SONAR_TOKEN` repository secret. Not required to merge (yet) -- see the badges
 above, or https://sonarcloud.io/organizations/atmospheres/projects for the full dashboards.
 
+Code coverage feeds into the quality gate too: backend via JaCoCo (`mvn test` writes
+`target/site/jacoco/jacoco.xml`), frontend via Vitest's v8 coverage provider (`npm test --
+--coverage` writes `coverage/lcov.info`). Both get fed to Sonar as part of the same analysis
+step -- no separate coverage step in CI.
+
 Fork PRs don't have access to `SONAR_TOKEN` (GitHub withholds secrets from fork-triggered
 `pull_request` runs), so that step fails there; not a concern while this repo has no external
 contributors.

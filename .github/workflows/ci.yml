@@ -70,6 +70,7 @@ jobs:
           -Dsonar.projectKey=Atmospheres_Forge-backend
           -Dsonar.organization=atmospheres
           -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       - name: Upload dependency-check report
         if: always()
@@ -105,7 +106,7 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm test -- --run
+        run: npm test -- --run --coverage
 
       - name: Build
         run: npm run build
@@ -126,3 +127,4 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src
             -Dsonar.exclusions=**/routeTree.gen.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
