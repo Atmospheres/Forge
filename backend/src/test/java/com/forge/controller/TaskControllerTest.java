@@ -235,8 +235,8 @@ class TaskControllerTest {
         when(newColumnSibling.getId()).thenReturn(newColumnSiblingId);
         when(newColumnSibling.getStatus()).thenReturn(Task.TaskStatus.DONE);
 
-        // TODO: moving(0), oldColumnSibling(1) — DONE: newColumnSibling(0)
-        // Dragging `moving` into DONE at index 0
+        // Starting positions: moving(0) and oldColumnSibling(1) in the To Do column,
+        // newColumnSibling(0) in Done. Dragging `moving` into Done at index 0.
         when(taskRepository.findByProjectIdOrderByPositionAsc(projectId))
             .thenReturn(List.of(moving, oldColumnSibling, newColumnSibling));
 
@@ -251,7 +251,8 @@ class TaskControllerTest {
         verify(newColumnSibling).setPosition(1);
         verify(taskRepository).saveAll(List.of(moving, newColumnSibling));
 
-        // Left behind in TODO — renumbered to close the gap `moving` left at index 0
+        // oldColumnSibling stays behind in the To Do column, renumbered to close the gap
+        // `moving` left at index 0.
         verify(oldColumnSibling).setPosition(0);
         verify(taskRepository).saveAll(List.of(oldColumnSibling));
     }
